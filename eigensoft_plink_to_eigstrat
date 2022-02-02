@@ -1,0 +1,43 @@
+# Preparing 1000 Genome bed/bim/fam files for conversion to eigenstat using Eigensoft 
+# Eigensoft github:  https://github.com/argriffing/eigensoft
+
+# IDs longer than 40 characters halt convertf
+# Confirm and find all occurances of <40 character IDs
+awk 'length($2)>40' 1000G_All_chr_merged.bim > IDtoolong.bim
+
+
+# Check occurences
+wc -l IDtoolong.bim     # Over 2000 occurances 
+
+
+# Loop through and delete the first semicolon and all characters after within the ID column (in this case, column two)
+sed 's/;[^[:space:]]*//' 1000G_All_chr_merged.bim > 1000G_All_chr_merged_shortened.bim
+
+
+# Eigensoft removes all samples with no phenotype values of -9 or 0 ('1' = control, '2' = case, '-9'/'0'/non-numeric = missing data if case/control)
+# Change -9 throughout col 6 in .fam file to 1
+awk '{OFS="\t"; $6=1; print}' 1000G_All_chr_merged.fam > 1000G_All_chr_merged_forprocessing.fam
+
+
+# Prepare 
+nano par_convertf
+	#----------------put inside-------------------#
+		genotypename: 1000G_All_chr_merged.bed
+		snpname: 1000G_All_chr_merged_shortened.bim
+		indivname: 1000G_All_chr_merged_forprocessing.fam
+		outputformat: EIGENSTRAT
+		genotypeoutname: E_1000G_All_chr_merged.geno
+		snpoutname: E_1000G_All_chr_merged.snp
+		indivoutname: E_1000G_All_chr_merged.ind
+		familynames: NO
+	#---------------------------------------------#
+
+
+# Load Eigensoft or run local convertf (example in line 43), then run convertf
+
+# Load:
+module load eig/7.2.1
+convertf -p par_convertf
+
+# Run local convertf:
+# ./convertf -p par_convertf
