@@ -41,3 +41,22 @@ convertf -p par_convertf
 
 # Run local convertf:
 # ./convertf -p par_convertf
+
+___________________________________________________________________________________________________________________________
+
+# Merging CDB, Kho100, 1000Genomes
+
+# Make file list
+# nano allfiles.txt
+	# kho100_snpsonly_clean.bed kho100_snpsonly_clean.bim kho100_snpsonly_clean.fam
+	# 1000G_snpsonly_clean.bed 1000G_snpsonly_clean.bim 1000G_snpsonly_clean.fam
+
+
+plink --bfile cdb_only --merge-list allfiles.txt --make-bed --out merged_CDB1000Kho
+
+# To address the "Warning: Multiple positions seen for variant 'X'", try:
+	# Step 1 - First merge: plink --file fA --merge-list allfiles.txt --make-bed --out mynewdata
+	# Step 2 - Flip SNPs: plink --file fA --flip mynewdata.missnp --make-bed --out mynewdata2
+	# Step 3 - New merge: plink --bfile mynewdata2 --merge-list allfiles.txt --make-bed --out mynewdata3
+	
+# https://www.biostars.org/p/271694/.   --> helpful
